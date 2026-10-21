@@ -35,7 +35,7 @@ jobs:
         run: npm run build
         env:
           VITE_DEPLOY_TARGET: pages
-          VITE_AI_API_URL: ${{ vars.AI_API_URL }}
+          VITE_AI_API_URL: ${{ vars.AI_API_URL || 'https://stat-learning-app.ansfwatson4.workers.dev' }}
           VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v3
         with:

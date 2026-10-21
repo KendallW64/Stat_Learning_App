@@ -1,4 +1,4 @@
-name = "sportsstats-academy-ai"
+name = "stat-learning-app"
 main = "worker/index.js"
 compatibility_date = "2026-10-21"
 workers_dev = true

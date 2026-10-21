@@ -1,5 +1,7 @@
 # Connect a free-tier Gemini example to GitHub Pages
 
+The app is configured to use **https://stat-learning-app.ansfwatson4.workers.dev** in GitHub Pages builds by default. An explicit repository Actions variable `AI_API_URL` overrides that default. The Wrangler deployment name is `stat-learning-app` to match this service.
+
 The implementation is complete and mock/local-runtime tested. A real Gemini response and a public Worker deployment have **not** been verified: neither a Gemini key nor Cloudflare credentials are configured in the development environment.
 
 ## Architecture
@@ -14,7 +16,7 @@ This route uses Cloudflare’s Git integration, so you do **not** need to copy a
 
 1. Open **Cloudflare → Workers & Pages → Create application → GitHub**. Authorize access to this repository if prompted.
 2. Import **`KendallW64/Stat_Learning_App`**, branch **`main`**. Create a **Worker**, not a second Pages frontend.
-3. Set the Worker name to exactly **`sportsstats-academy-ai`**, matching `wrangler.toml`. Leave the existing handoff app Worker unchanged.
+3. Set the Worker name to exactly **`stat-learning-app`**, matching `wrangler.toml`. Leave the existing handoff app Worker unchanged.
 4. Use the repository root (`/`), **build command `npm ci`**, and **deploy command `npx wrangler deploy`**. If Cloudflare has already installed dependencies automatically, the explicit build command simply repeats the locked install. Deploy from the repository root so Wrangler discovers the checked-in configuration and Durable Object migration. Use Node 24 if selecting a build runtime.
 5. Deploy on the Cloudflare **Free** plan. If the account reports a requirement to upgrade, stop and check the free-plan capabilities rather than accepting a paid upgrade.
 6. After deployment, add **`GEMINI_API_KEY` as an encrypted Worker secret** using step 3 below. Set GitHub’s public **`AI_API_URL`** Actions variable and rerun Pages as described in step 4 below.
@@ -40,13 +42,13 @@ Never put token/key values in a commit, issue, chat, `wrangler.toml`, or any `VI
 
 Open [Deploy Gemini AI Worker](https://github.com/KendallW64/Stat_Learning_App/actions/workflows/ai-worker.yml), select **Run workflow**, and choose `main`. It installs locked dependencies, runs unit/API/Worker contract tests, and deploys `wrangler.toml` using Wrangler. This workflow is manual so an unconfigured account does not make every Pages build fail.
 
-When it succeeds, find `sportsstats-academy-ai` under **Workers & Pages** in Cloudflare. Copy the service’s HTTPS `workers.dev` URL. No custom domain is required. The account must support SQLite-backed Durable Objects on the chosen plan; if the account reports a restriction, stop rather than upgrading to a paid plan for this demo.
+When it succeeds, find `stat-learning-app` under **Workers & Pages** in Cloudflare. Copy the service’s HTTPS `workers.dev` URL. No custom domain is required. The account must support SQLite-backed Durable Objects on the chosen plan; if the account reports a restriction, stop rather than upgrading to a paid plan for this demo.
 
 ## 3. Add the Gemini key as an encrypted Worker secret
 
 Obtain a key for your free-tier demo project from [Google AI Studio](https://aistudio.google.com/apikey). Where available, restrict the key to the Generative Language API. A server key must not be restricted to a browser HTTP referrer.
 
-In Cloudflare, open **Workers & Pages → sportsstats-academy-ai → Settings → Variables and Secrets → Add**:
+In Cloudflare, open **Workers & Pages → stat-learning-app → Settings → Variables and Secrets → Add**:
 
 - Type: **Secret**
 - Name: **`GEMINI_API_KEY`**
@@ -61,9 +63,11 @@ The default `GEMINI_MODEL` is `gemini-flash-latest`, the alias used in Google’
 In the repository’s [Actions variables](https://github.com/KendallW64/Stat_Learning_App/settings/variables/actions), add:
 
 - Name: **`AI_API_URL`**
-- Value: your Worker’s HTTPS root URL, e.g. `https://sportsstats-academy-ai.YOUR-SUBDOMAIN.workers.dev`
+- Value: your Worker’s HTTPS root URL, e.g. `https://stat-learning-app.ansfwatson4.workers.dev`
 
 This URL is public and **is not a secret**. Do not append `/api/ai` and do not enter a key here.
+
+If `AI_API_URL` is unset, this repository already uses `https://stat-learning-app.ansfwatson4.workers.dev` by default. Remove or update an old override if it points to another service.
 
 Rerun the [Pages deployment workflow](https://github.com/KendallW64/Stat_Learning_App/actions/workflows/pages.yml). Vite reads `VITE_AI_API_URL` at build time, so editing the variable alone does not change an already deployed website.
 
