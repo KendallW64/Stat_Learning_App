@@ -1,0 +1,38 @@
+name: Deploy Gemini AI Worker
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Check deployment credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node -e "if (!process.env.CLOUDFLARE_API_TOKEN || !process.env.CLOUDFLARE_ACCOUNT_ID) { console.error('Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to repository Actions secrets first.'); process.exit(1); }"
+      - name: Deploy Worker (secret Gemini key is managed in Cloudflare)
+        run: npm run deploy:ai
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Connection steps
+        run: |
+          echo 'After deployment, add GEMINI_API_KEY as an encrypted Worker secret in Cloudflare.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Set repository Actions variable AI_API_URL to the Worker HTTPS URL, then rerun the Pages workflow.' >> "$GITHUB_STEP_SUMMARY"

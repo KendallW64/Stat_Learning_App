@@ -52,7 +52,7 @@ The repository includes `.github/workflows/pages.yml`. Pushes to `main` automati
 
 An Actions log or downloaded `index.html` artifact is not the published website. A 404 before the first successful deployment is expected; a persistent 404 means checking Source, workflow status and the exact project URL. Do not set Pages to “Deploy from a branch” for this workflow. If an environment approval is required by repository rules, approve the pending `github-pages` deployment.
 
-Pages serves static files and **cannot execute Express, SQLite or server-side AI requests**. The Pages edition implements course topic confirmation, sourced bundled data, all 12 calculations/practice lessons, hints and progress persistence entirely in the browser. It visibly labels browser-only storage and offline tutoring. Browser progress does not synchronize to the server, other devices or browsers, and clearing site data removes it. No API credentials belong in Pages build variables. Optional direct public MLB requests may fail because of network/CORS restrictions and fall back transparently. The existing Node/SQLite deployment remains available for server-based storage and optional model integration.
+Pages serves static files and **cannot execute Express, SQLite or server-side AI requests**. The Pages edition implements course topic confirmation, sourced bundled data, all 12 calculations/practice lessons, hints and progress persistence entirely in the browser. It visibly labels browser-only storage and offline tutoring. Browser progress does not synchronize to the server, other devices or browsers, and clearing site data removes it. No API credentials belong in Pages build variables. Optional direct public MLB requests may fail because of network/CORS restrictions and fall back transparently. Pages can optionally call a separately hosted Gemini Worker, configured through `AI_API_URL`; local progress still stays in the browser. The existing Node/SQLite deployment remains available for server-based storage.
 
 To reproduce and test the static site locally:
 
@@ -68,13 +68,17 @@ npm run preview:pages
 
 Git push access is distinct from GitHub API/Pages administration. Deployment settings and live Actions status could not be queried from the development environment (proxy Forbidden). Local static deployment tests pass; the public deployment must be confirmed by the green deploy job.
 
-## Optional AI model
+## Gemini AI (optional free-tier demo)
 
-Without a key, the app uses a deterministic topic-aware guide, **not generative AI**. It provides hints, sample/population explanations, alternate examples and course connections; its language understanding is intentionally limited.
+AI tutoring, conversational follow-up, guided numerical tools and syllabus-topic suggestions are implemented through a secure backend. The browser never receives a model key. See **[the Gemini + Cloudflare setup guide](docs/GEMINI_SETUP.md)** for exact Actions secrets, Worker secret, public URL variable and deployment steps.
 
-Copy `.env.example` to `.env` and enter `OPENAI_API_KEY` securely on your server, or inject it through your hosting secret manager. Never expose it with a `VITE_` prefix. `OPENAI_MODEL` defaults to `gpt-4.1-mini`. Restart the server after changing environment variables. Node loads `.env` for npm dev/start and respects HTTPS proxy configuration via `--use-env-proxy`. The adapter calls the OpenAI Responses API. Live model access was not tested because no key is present; request construction, context and response parsing are tested with a mock.
+The Pages workflow reads the repository **Actions variable `AI_API_URL`** and builds the public Worker URL into the frontend. It does not read model secrets. The separate **Deploy Gemini AI Worker** workflow is manually triggered after you securely configure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Add **`GEMINI_API_KEY` as an encrypted Worker secret in Cloudflare**, not as a Vite variable. No paid services are assumed; use a provider project/model eligible for free quota with paid billing disabled.
 
-The AI receives the student's saved course, confirmed topics, chosen sport, explanation level, topic-specific attempt counts and deterministic worked example. Syllabus text is not retained or sent. The tutor is instructed to guide rather than solve practice exercises. Generative text is not independently fact-checked at runtime; numerical grading always runs through the deterministic engine. The offline guide remains available when a model request fails.
+AI is explicitly opt-in in the tutor and syllabus form. Tutor context includes the confirmed course/topics, sport, level, aggregate attempts and recent messages; no raw syllabus or personal team/player preference is included. Syllabus text is sent only when the separate syllabus AI checkbox is enabled. Use public/fictional examples: free-tier Gemini data-use terms may allow submitted content to improve services.
+
+The Gemini adapter handles function calls through the deterministic statistics engine and returns validated calculation results to the model. Practice grading stays deterministic. It uses the Gemini `generateContent` API and a configurable model (`gemini-flash-latest` by default). Live Gemini availability is **not verified** without a configured key. Mock tests cover tool roundtrips, thought signatures, structured syllabus evidence, secret boundaries and provider/quota failure fallback. The bundled offline guide remains available with no key or when a service fails.
+
+For the Node version, set `GEMINI_API_KEY` in the ignored server `.env` or host secret manager, optionally set `GEMINI_MODEL`, and restart. The previous OpenAI-specific adapter has been replaced with Gemini for this demo. Connection status reports Worker configuration; only a successfully labeled Gemini response verifies real model access.
 
 ## Production run and deployment
 
@@ -96,7 +100,9 @@ This MVP has no accounts or authentication. Its random browser ID is a convenien
 - `shared/stats.js`: pure deterministic formulas, validation, and rounding-aware grading.
 - `shared/lessons.js`: 12 concept explanations, worked calculations, practice and topic matching.
 - `shared/data.js`: browser-safe normalized sports datasets and adapters; `server/data.js` re-exports them.
-- `server/app.js`: input validation, SQLite profiles/attempts and optional model-backed tutoring.
+- `server/app.js`: input validation and SQLite profiles/attempts; `server/ai-engine.js` and `ai-routes.js`: Gemini adapter, statistics tools, origin checks and usage guards.
+- `worker/` + `wrangler.toml`: Cloudflare Worker and shared durable quota, used by the Pages edition.
+- `src/ai-client.js`: consent-aware AI connection and explicit offline fallback.
 - `data/warriors.json`: attributed, verified historical extract.
 - `src/browser-api.js`: static-hosting persistence and grading adapter; `shared/tutor.js`: common offline guide.
 - `tests/`: formula, API, provider failure, tutor contract, student journey, Pages and responsive UI tests.

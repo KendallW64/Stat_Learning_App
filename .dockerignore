@@ -6,3 +6,7 @@ dist
 test-results
 playwright-report
 dist-pages
+.wrangler
+.worker-build
+.dev.vars
+.dev.vars.*

@@ -1,0 +1,21 @@
+name = "sportsstats-academy-ai"
+main = "worker/index.js"
+compatibility_date = "2026-10-21"
+workers_dev = true
+send_metrics = false
+
+[vars]
+# Model availability/free-tier quotas vary. Pick a model listed in your AI Studio account.
+GEMINI_MODEL = "gemini-flash-latest"
+AI_ALLOWED_ORIGINS = "https://kendallw64.github.io"
+AI_DAILY_REQUEST_LIMIT = "40"
+
+[[durable_objects.bindings]]
+name = "AI_BUDGET"
+class_name = "AIBudget"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AIBudget"]
+
+# GEMINI_API_KEY is a Worker secret. Never put a key in this file or a VITE_ variable.

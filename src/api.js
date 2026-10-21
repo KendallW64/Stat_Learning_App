@@ -18,3 +18,9 @@ export async function api(path, options = {}) {
   if (!response.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
+
+export async function aiClient() {
+  const {createAIClient}=await import('./ai-client.js');
+  const base=import.meta.env.VITE_AI_API_URL||'';
+  return createAIClient({base,enabled:!isPages||Boolean(base),student});
+}

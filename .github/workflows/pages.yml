@@ -35,6 +35,7 @@ jobs:
         run: npm run build
         env:
           VITE_DEPLOY_TARGET: pages
+          VITE_AI_API_URL: ${{ vars.AI_API_URL }}
           VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -5,3 +5,7 @@ dist/
 playwright-report/
 test-results/
 dist-pages/
+.wrangler/
+.worker-build/
+.dev.vars
+.dev.vars.*

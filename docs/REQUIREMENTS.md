@@ -20,7 +20,7 @@
 | Editable datasets/visualization | Explorer area/bar switch and accessible numeric table; most worked lessons allow custom values. No arbitrary paired data editor yet |
 | Sample vs population, descriptive vs inferential | Explained and sample/population spread toggle implemented |
 | Guided learning and skill levels | Hints before answer, retry feedback, three saved levels used in tutor context. No autonomous validated student ability model |
-| AI tutor | Contextual offline guide works; secure Responses API adapter and mocked contract tests implemented. **Live generative model not tested or connected without a key** |
+| AI tutor | Contextual offline guide works; secure Gemini adapter, tool execution, history, opt-in and mocked contract tests implemented. **Live generative model not tested or connected without a key** |
 | Numerical reliability | Pure engine with unit tests; grading never delegates arithmetic to a model. AI prose is not fully numerically verified at runtime |
 | Progress/quiz/review | Topic practice, attempt accuracy, incorrect-attempt hints, next unpracticed recommendation and persisted history. One question per topic; no broad quiz bank, streak or unearned mastery claims |
 | Private student data | No syllabus retention, no stored chats. SQLite profile/attempt storage; **production authentication/access controls absent** |
@@ -33,3 +33,7 @@ No betting or gambling examples are used. The application is a functional local 
 ## Static GitHub Pages edition
 
 The Actions deployment adds a separately labeled browser-only edition. Course confirmation, practice grading, attributed datasets, offline tutoring, and browser-local progress work without Express. Server accounts/SQLite and model-backed AI are not hosted by Pages. See README for Source selection, workflow deployment and local static tests.
+
+## Optional Gemini service
+
+Pages can connect to a separate Cloudflare Worker with server-only `GEMINI_API_KEY`. Live provider access is pending secure account/key configuration, not claimed completed. AI syllabus suggestions are opt-in and evidence-checked; user confirmation is still required. Durable usage caps protect the demo allowance without replacing production authentication. The setup guide explicitly describes free-tier eligibility and public/fictional-data-only use.
