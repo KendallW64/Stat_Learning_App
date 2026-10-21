@@ -12,8 +12,8 @@ for(const league of leagues){
    const player=roster.players.find(p=>p.name.includes('Curry'));
    if(player){try{const points=await provider.dataset({league:league.id,team:team.id,season:2025,player:player.id,statistic:'points'});record.player={name:points.player,observations:points.rows.length,values:points.rows.map(r=>r.value),source:points.sources};}catch(error){record.playerError=error.message;}}
   }
-  results.push({ok:true,...record});console.log(league.name+': '+data.rows.length+' observations from '+team.name);
- }catch(error){results.push({ok:false,league:league.id,error:error.message});console.log(league.name+': '+error.message);}
+  results.push({ok:true,...record});console.log(league.name+': '+data.rows.length+' observations from '+team.name);console.log('::notice title=Sports '+league.id+'::'+JSON.stringify(results.at(-1)));
+ }catch(error){results.push({ok:false,league:league.id,error:error.message});console.log(league.name+': '+error.message);console.log('::error title=Sports '+league.id+'::'+error.message);}
 }
 fs.writeFileSync('sports-provider-results.json',JSON.stringify(results,null,2));
 if(results.some(r=>!r.ok)||!results.find(r=>r.league==='nba')?.player)process.exitCode=1;
