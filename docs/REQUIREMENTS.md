@@ -29,3 +29,7 @@
 | Install/run/test/deploy/roadmap | README, Dockerfile and provider/validation docs included. Docker recipe unexecuted |
 
 No betting or gambling examples are used. The application is a functional local learning MVP, not a fully integrated multi-institution or multi-league production service.
+
+## Static GitHub Pages edition
+
+The Actions deployment adds a separately labeled browser-only edition. Course confirmation, practice grading, attributed datasets, offline tutoring, and browser-local progress work without Express. Server accounts/SQLite and model-backed AI are not hosted by Pages. See README for Source selection, workflow deployment and local static tests.

@@ -2,7 +2,7 @@
 
 ## Executed checks
 
-- `npm test`: 20 passing tests covering deterministic formulas, every lesson's worked/practice contract, invalid numeric data, unknown course handling, complete API journey, persistence, student ID separation, provider fixtures/failures and tutor fallback.
+- `npm test`: 24 passing tests covering deterministic formulas, every lesson's worked/practice contract, invalid numeric data, unknown course handling, complete API journey, persistence, student ID separation, provider fixtures/failures and tutor fallback.
 - `npm run test:ui`: 5 passing Chromium scenarios covering full student journey and saved progress after reload; provider-unavailable interface plus tutor hint; mobile navigation and lesson overflow at 390 px; all 12 worked examples and graded responses; local syllabus upload and explicit topic confirmation.
 - Clean `npm ci --cache /tmp/sports-npm` and `npm run build`: installation and production Vite build passed. Recharts creates a large JavaScript bundle; code splitting is a future performance improvement.
 - Actual historical dataset retrieval succeeded through GitHub; source hash and extraction documented separately.
@@ -29,3 +29,9 @@ Tests use independently calculable values: data [2,4,4,4,5,5,7,9] has μ=5, popu
 ## Remaining quality work
 
 Production identity/privacy/security controls, accessibility audit with assistive technology, broader device matrix, live-provider and model smoke tests with configured access, additional question banks, held-out model validation and performance/code splitting remain future work. Browser tests exercise one complete lesson journey plus every lesson's mathematical contract in unit tests; they do not assert that every possible learning interaction is exhaustive.
+
+## GitHub Pages addition
+
+The browser-only Pages adapter has four unit tests for persistence/reload, separate student IDs, conservative course identification, grading retry, offline hints, provider fallback and invalid/storage-error handling. Two additional Chromium scenarios verify the built static site beneath `/Stat_Learning_App/`, with no `/api` calls, no missing assets, no uncaught application errors, saved profile/attempts after reload and a mobile provider outage. `npm run build:pages` and `npm run test:pages` passed.
+
+The workflow builds from `main` with Pages-provided base paths and deploys only the static artifact. GitHub Pages must have **Source: GitHub Actions** selected. GitHub API and the public Pages host return proxy Forbidden from this development environment, so live workflow completion/availability could not be checked here. Browser-only progress is not server SQLite progress; AI credentials remain server-only and are never bundled.

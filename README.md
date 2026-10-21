@@ -39,6 +39,35 @@ Browser tests automatically use `/usr/bin/chromium` if present, or Playwright Ch
 
 See [validation](docs/VALIDATION.md) for executed results, assumptions and limits; [requirements audit](docs/REQUIREMENTS.md) for feature status.
 
+## GitHub Pages deployment (GitHub Actions)
+
+The repository includes `.github/workflows/pages.yml`. Pushes to `main` automatically test, build, upload and deploy the **Pages edition**. It uses `actions/configure-pages`, `actions/upload-pages-artifact` and `actions/deploy-pages`, with scoped `pages: write` and `id-token: write` permissions for deployment. The Vite asset base comes from Pages metadata, so project-site files are served beneath `/Stat_Learning_App/` rather than the domain root.
+
+**One-time repository setup:**
+
+1. Open https://github.com/KendallW64/Stat_Learning_App/settings/pages .
+2. Under **Build and deployment → Source**, choose **GitHub Actions**. If Pages is unavailable for the repository's visibility/plan, GitHub will show that restriction here.
+3. Open **Actions → Deploy SportsStats Academy to GitHub Pages → Run workflow**, choose `main`, and run it (or push another commit).
+4. Wait for both **build** and **deploy** jobs to turn green. Open the `github-pages` environment URL in the deployment job: **https://kendallw64.github.io/Stat_Learning_App/** .
+
+An Actions log or downloaded `index.html` artifact is not the published website. A 404 before the first successful deployment is expected; a persistent 404 means checking Source, workflow status and the exact project URL. Do not set Pages to “Deploy from a branch” for this workflow. If an environment approval is required by repository rules, approve the pending `github-pages` deployment.
+
+Pages serves static files and **cannot execute Express, SQLite or server-side AI requests**. The Pages edition implements course topic confirmation, sourced bundled data, all 12 calculations/practice lessons, hints and progress persistence entirely in the browser. It visibly labels browser-only storage and offline tutoring. Browser progress does not synchronize to the server, other devices or browsers, and clearing site data removes it. No API credentials belong in Pages build variables. Optional direct public MLB requests may fail because of network/CORS restrictions and fall back transparently. The existing Node/SQLite deployment remains available for server-based storage and optional model integration.
+
+To reproduce and test the static site locally:
+
+```sh
+npm ci
+npm run test:pages
+# Or build and keep a static preview running:
+npm run build:pages
+npm run preview:pages
+```
+
+`test:pages` runs two real-browser checks against a static preview under the project subdirectory: complete course/practice/reload/tutor journey with no API requests or missing assets, and mobile provider-failure handling. Use the same Chromium installation instructions as the normal browser suite. Build output is `dist-pages/`; the workflow builds its deployable artifact into `dist/`. For a different repository name or a custom domain, the workflow's Pages metadata supplies the production base path; adjust local preview/test paths accordingly.
+
+Git push access is distinct from GitHub API/Pages administration. Deployment settings and live Actions status could not be queried from the development environment (proxy Forbidden). Local static deployment tests pass; the public deployment must be confirmed by the green deploy job.
+
 ## Optional AI model
 
 Without a key, the app uses a deterministic topic-aware guide, **not generative AI**. It provides hints, sample/population explanations, alternate examples and course connections; its language understanding is intentionally limited.
@@ -66,10 +95,11 @@ This MVP has no accounts or authentication. Its random browser ID is a convenien
 - `src/`: six responsive application sections and reusable UI.
 - `shared/stats.js`: pure deterministic formulas, validation, and rounding-aware grading.
 - `shared/lessons.js`: 12 concept explanations, worked calculations, practice and topic matching.
-- `server/data.js`: normalized sports dataset contract, bundled adapter and MLB adapter.
+- `shared/data.js`: browser-safe normalized sports datasets and adapters; `server/data.js` re-exports them.
 - `server/app.js`: input validation, SQLite profiles/attempts and optional model-backed tutoring.
 - `data/warriors.json`: attributed, verified historical extract.
-- `tests/`: formula, API, provider failure, tutor contract, student journey and responsive UI tests.
+- `src/browser-api.js`: static-hosting persistence and grading adapter; `shared/tutor.js`: common offline guide.
+- `tests/`: formula, API, provider failure, tutor contract, student journey, Pages and responsive UI tests.
 
 ## Development roadmap
 
