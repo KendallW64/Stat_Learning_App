@@ -7,7 +7,7 @@ for(const league of leagues){
   const data=await provider.dataset({league:league.id,team:team.id,season:2025});
   if(!data.rows.length||data.rows.some(r=>!Number.isFinite(r.value)))throw new Error('No finite observations');
   const record={league:league.id,team:team.name,teamId:team.id,teams:catalog.teams.length,observations:data.rows.length,first:data.rows[0],last:data.rows.at(-1),source:data.url};
-  if(league.id==='epl'){const raw=await(await fetch(`https://site.api.espn.com/apis/site/v2/sports/${league.path}/summary?event=${data.rows.at(-1).id}`)).json();console.log('::notice title=Soccer player schema::'+JSON.stringify({keys:Object.keys(raw),boxscoreKeys:Object.keys(raw.boxscore||{}),playerGroup:raw.boxscore?.players?.[0],rosterGroup:raw.rosters?.[0]}).slice(0,9000));}
+
   if(league.id==='nba'){
    const roster=await provider.roster(league.id,team.id,2025);record.roster=roster.players.length;record.rosterScope=roster.scope;record.rosterWarning=roster.warning;
    const player=roster.players.find(p=>p.name.includes('Curry'));

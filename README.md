@@ -4,6 +4,16 @@ Repository: `KendallW64/Stat_Learning_App`.
 
 A responsive React + Express statistics learning app with 12 interactive topics, transparent calculations, sourced historical NBA data, guided practice, a server-side optional AI adapter, and SQLite progress. The initial course-to-practice journey works without subscriptions or API keys.
 
+## Current working features
+
+- Load original team or player observations with functional sport/league/team/season/player/statistic selectors. Ten league adapters cover professional and collegiate basketball, football, baseball, soccer and hockey. Each dataset includes provider URLs, season, dates, units and scope. Player history and roster gaps are disclosed instead of inventing numbers.
+- Use the selected data in charts and transparent worked lessons; saved selection descriptors reload from the provider after refresh. Practice grading and progress remain deterministic.
+- Delete individual AI questions with their replies, including pending questions; clear a conversation; deleted turns are excluded from future context.
+- Opt into Gemini tutoring or cited web research. Search/provider quota failures show an explicit reference/offline fallback, never a fabricated record or a false “verified” course requirement.
+- Upload a text-based PDF, text or Markdown syllabus locally; confirm extracted topics, or research public course sources with Gemini. Scanned PDFs require pasted text.
+
+See [the functional audit](docs/RELIABILITY_AUDIT.md) for verification and remaining limits.
+
 ## Run
 
 Requires Node 24.5+ (tested on 24.19.0) and npm. Use the existing checkout; no worktree is needed.
@@ -18,7 +28,7 @@ The server listens on port 3000. In a local installation, open the application u
 
 ## Try the student journey
 
-1. Choose **Build my learning roadmap**. Enter a course name and optionally university/course number. Paste syllabus text or load a local `.txt` / `.md` file under 30 KB. PDF is not supported; paste its text.
+1. Choose **Build my learning roadmap**. Enter a course name and optionally university/course number. Paste syllabus text or load a local `.txt` / `.md` file under 30 KB or text-based PDF under 5 MB. The app discloses page/text limits; scanned PDFs require pasted text.
 2. Select **Find topics**. A name without recognized topic words triggers a request for more information. Confirm topic checkboxes yourself, choose a sport/team preference and explanation level, then save.
 3. Start a lesson, open **Worked example**, inspect the original observations, provenance, formula, and calculation steps. In the spread lesson, switch sample/population denominators. Most data-based lessons allow custom values; custom values are explicitly labeled.
 4. Open **Practice**, attempt the problem, request an optional hint, and retry. Correct answers mark a topic practiced. Both incorrect and correct attempts are retained for review.
@@ -111,7 +121,7 @@ This MVP has no accounts or authentication. Its random browser ID is a convenien
 
 1. Add secure accounts, access controls, deletion/export and privacy review before public multiuser use.
 2. Add vetted course catalogs, explicit confidence handling, and local PDF extraction with consent.
-3. Add licensed league/team/player discovery and caching; retain source, season, retrieval time and scope on every dataset. See [provider evaluation](docs/DATA_PROVIDERS.md).
+3. Expand provider licensing review, historical-player coverage and cache resilience; retain source, season, retrieval time and scope on every dataset. See [provider evaluation](docs/DATA_PROVIDERS.md).
 4. Expand the question bank to multi-step quizzes and adaptive recommendations. Current completion is one correct response, not a validated mastery model.
 5. Add bootstrap simulations, Student-t intervals for unknown variance, residual diagnostics, held-out model evaluation and instructor assignments.
 6. Evaluate live-model tutoring for numerical faithfulness, prompt injection and hint/answer boundaries before claiming production AI reliability.

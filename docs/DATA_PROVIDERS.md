@@ -25,3 +25,9 @@ For Baseball, Football, Soccer and Hockey, bundled values are generated teaching
 ## Network destinations
 
 Core learning works offline after install. npm installation requires `registry.npmjs.org`. Optional MLB retrieval requires `statsapi.mlb.com`; optional model tutoring requires `api.openai.com`. Historical data is already bundled; refreshing provenance uses `raw.githubusercontent.com`. No network allowlist was broadened during implementation. The provider blockage does not block the local learning workflow.
+
+## Expanded ESPN integration
+
+`shared/sports-provider.js` implements ten fixed-path league adapters behind the Worker/Node `/api/sports` endpoint. Inputs cannot supply arbitrary remote hosts. Catalogs, rosters, completed schedules and box scores are parsed as separate schemas. The public-provider workflow verified representative completed 2025 team observations in all ten leagues and NBA player observations. Subsequent live Worker requests verified batting, passing and hockey examples as well. See `RELIABILITY_AUDIT.md` for exact boundaries.
+
+ESPN endpoints are a public integration, not an official licensed commercial API contract or uptime guarantee. No license to redistribute all provider content is claimed. Attribution and direct source URLs are retained. Current rosters are an explicitly labeled fallback when the requested historical roster is absent. Soccer uses match-roster statistics and baseball hitting uses only batting tables.

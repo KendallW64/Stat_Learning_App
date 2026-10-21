@@ -9,3 +9,5 @@ dist-pages/
 .worker-build/
 .dev.vars
 .dev.vars.*
+
+sports-provider-results.json

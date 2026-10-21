@@ -14,7 +14,7 @@ export const leagues = [
 export const defaultLeague = sport => leagues.find(l=>l.sport===sport)?.id || 'nba';
 export function statisticsFor(league){
  const sport=leagues.find(l=>l.id===league)?.sport;
- const bySport={Basketball:[['points','Points','PTS'],['rebounds','Rebounds','REB'],['assists','Assists','AST']],Baseball:[['hits','Hits','H'],['homeRuns','Home runs','HR'],['runs','Runs','R']],Football:[['passingYards','Passing yards','YDS','passing'],['rushingYards','Rushing yards','YDS','rushing'],['receivingYards','Receiving yards','YDS','receiving']],Soccer:[['goals','Goals','G'],['assists','Assists','A'],['totalShots','Shots','SH']],Hockey:[['goals','Goals','G'],['assists','Assists','A'],['shotsTotal','Shots','S']]};
+ const bySport={Basketball:[['points','Points','PTS'],['rebounds','Rebounds','REB'],['assists','Assists','AST']],Baseball:[['hits','Hits','H','batting'],['homeRuns','Home runs','HR','batting'],['runs','Runs','R','batting']],Football:[['passingYards','Passing yards','YDS','passing'],['rushingYards','Rushing yards','YDS','rushing'],['receivingYards','Receiving yards','YDS','receiving']],Soccer:[['goals','Goals','G'],['assists','Assists','A'],['totalShots','Shots','SH']],Hockey:[['goals','Goals','G'],['assists','Assists','A'],['shotsTotal','Shots','S']]};
  return (bySport[sport]||[]).map(([id,name,label,group])=>({id,name,label,group}));
 }
 const ROOT='https://site.api.espn.com/apis/site/v2/sports/';
@@ -65,6 +65,16 @@ export function createSportsProvider({fetcher=fetch,now=()=>Date.now()}={}){
     try{return{game,source,data:await get(source)};}catch{return{game,source,data:null};}
    }));
    for(const {game,source,data} of boxscores){
+    if(league.sport==='Soccer'){
+      const entry=data?.rosters?.find(g=>String(g.team?.id)===teamId)?.roster?.find(p=>String(p.athlete?.id)===playerId);
+      const appearances=entry?.stats?.find(s=>s.name==='appearances')?.value;
+      const played=entry?.starter===true||entry?.subbedIn===true||Number(appearances)>0;
+      const aliases={goals:['totalGoals','goals','goalsScored'],assists:['goalAssists','assists'],totalShots:['totalShots','shots']};
+      const observation=entry?.stats?.find(s=>aliases[stat.id]?.includes(s.name));
+      const raw=observation?.value??observation?.displayValue;
+      if(played&&raw!==undefined&&raw!==null&&raw!==''&&Number.isFinite(Number(raw))){playerName=entry.athlete.displayName||entry.athlete.fullName;rows.push({...game,value:Number(raw),sourceUrl:source});sources.push(source);}
+      continue;
+    }
     const group=data?.boxscore?.players?.find(g=>String(g.team?.id)===teamId);
     for(const table of group?.statistics||[]){
      if(stat.group&&String(table.name||'').toLowerCase()!==stat.group)continue;

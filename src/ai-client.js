@@ -4,11 +4,11 @@ import {identify} from '../shared/lessons.js';
 // The URL is public configuration. Keys are never accepted or stored in a browser.
 export function createAIClient({base='',enabled=true,student,fetcher=fetch}={}) {
   const root=base.replace(/\/$/,'');
-  async function call(path,body){
+  async function call(path,body,signal){
     if(root&&!/^https:\/\//i.test(root)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(root))throw new Error('AI service must use HTTPS.');
     const response=await fetcher(`${root}/api/ai/${path}`,{
       method:body?'POST':'GET',headers:{'Content-Type':'application/json','x-student-id':student},
-      ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(path==='status'?15000:70000),
+      ...(body?{body:JSON.stringify(body)}:{}),signal:signal?AbortSignal.any([signal,AbortSignal.timeout(path==='status'?15000:70000)]):AbortSignal.timeout(path==='status'?15000:70000),
     });
     if(!response.ok){const error=new Error(response.status===429?'AI request limit reached. Please wait before trying again.':'The AI service could not be reached.');error.code=response.status===404?'endpoint-not-found':response.status===403?'forbidden':response.status===429?'rate-limited':'service-error';throw error;}
     return response.json();
@@ -19,15 +19,16 @@ export function createAIClient({base='',enabled=true,student,fetcher=fetch}={}) 
     try{const result=await call('status');if(typeof result?.available!=='boolean')return{available:false,reason:'invalid-response',statusUrl};return{...result,statusUrl};}
     catch(error){return{available:false,reason:error.code||(error instanceof SyntaxError?'invalid-response':'unreachable'),statusUrl};}
   }
-  async function tutor(body,{useAI=false}={}){
-    if(enabled&&useAI){try{return await call('tutor',body);}catch(e){return{ai:false,mode:'Offline guide · AI unavailable',text:`${e.message}\n\n${offlineGuide({message:body.message,topic:body.topic,profile:body.context?.profile})}`};}}
+  async function tutor(body,{useAI=false,signal}={}){
+    if(enabled&&useAI){try{return await call('tutor',body,signal);}catch(e){return{ai:false,mode:'Offline guide · AI unavailable',text:`${e.message}\n\n${offlineGuide({message:body.message,topic:body.topic,profile:body.context?.profile})}`};}}
     return{ai:false,mode:'Offline teaching guide · no AI model connected',text:offlineGuide({message:body.message,topic:body.topic,profile:body.context?.profile})};
   }
   async function course(text,{useAI=false}={}){
     if(enabled&&useAI){try{return await call('course',{text});}catch{return{topics:identify(text),confirmed:false,ai:false,message:'AI could not be reached. Keyword suggestions are shown; confirm them against your syllabus.'};}}
     const topics=identify(text);return{topics,confirmed:false,ai:false,message:topics.length?'Topics were found in your text. Confirm them against your syllabus before saving.':'We cannot verify a curriculum from this course name. Add syllabus text or manually select your topics.'};
   }
-  return{status,tutor,course};
+  async function research(message,{signal}={}){if(!enabled)return{ai:false,mode:'Research unavailable',text:'Connect the secure Gemini service for cited web research.',sources:[]};try{return await call('research',{message},signal);}catch{return{ai:false,mode:'Research unavailable',text:'The web research request could not be completed. Try again later or use the sourced Sports Data Explorer.',sources:[]};}}
+  return{status,tutor,course,research};
 }
 
 export function describeAIStatus(status) {

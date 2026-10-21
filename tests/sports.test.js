@@ -26,3 +26,7 @@ test('API errors, unavailable observations and unsafe/unsupported selections fai
  const offline=createSportsProvider({fetcher:async()=>{throw new Error('network');}});await assert.rejects(offline.teams('nba'),/could not be reached/);
 });
 test('repeated provider reads reuse bounded cached responses',async()=>{let calls=0;const service=createSportsProvider({fetcher:async()=>{calls++;return response({sports:[{leagues:[{teams:[{team:{id:'9',displayName:'Warriors'}}]}]}]});}});await service.teams('nba');await service.teams('nba');assert.equal(calls,1);});
+test('soccer uses match-roster statistics and excludes unused substitutes rather than turning them into zero',async()=>{
+ const service=createSportsProvider({fetcher:async url=>url.includes('/schedule')?response({team:{displayName:'Example club'},events:[fixture('1',2),fixture('2',1)]}):response({rosters:[{team:{id:'9'},roster:[{athlete:{id:'30',displayName:'Example forward'},starter:url.endsWith('1'),subbedIn:false,stats:[{name:'appearances',value:url.endsWith('1')?1:0},{name:'totalGoals',value:0}]}]}]})});
+ const data=await service.dataset({league:'epl',team:'9',season:2025,player:'30',statistic:'goals'});assert.equal(data.rows.length,1);assert.equal(data.rows[0].value,0);assert.match(data.scope,/1 games/);
+});

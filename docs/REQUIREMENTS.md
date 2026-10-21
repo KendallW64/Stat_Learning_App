@@ -4,11 +4,11 @@
 |---|---|
 | Dashboard, course, explorer, learning, tutor, progress sections | Implemented, navigable and responsive |
 | Complete course → sport → lesson → practice → saved progress journey | Implemented and browser tested, including wrong-answer retry and reload |
-| University/course search | Name/number entry and topic matching implemented; **no verified institution catalog lookup**. Unknown names require syllabus/topic input |
-| Syllabus upload | Local `.txt`/`.md` loading and topic detection; no document retained. **PDF and image OCR not implemented** |
+| University/course search | Name/number entry and topic matching implemented; Gemini cited public-course research is available, but **no automatic institutional verification**. Unknown names require syllabus/topic input |
+| Syllabus upload | Local `.txt`/`.md` and text-based PDF extraction with limits and topic detection; no document retained. **Scanned-image OCR not implemented** |
 | Personalized pathway | Student confirms topics; ordered roadmap and next unpracticed recommendation. No AI claim of verified requirements |
-| Favorite sport/team/player | Five sports selectable; free-text team/player preference saved. **No broad team/player catalog or player-level data filtering** |
-| NBA/WNBA/NCAA/NFL/MLB/soccer/NHL coverage | Authentic NBA bundle and one historical MLB adapter. Other sports synthetic; **WNBA/NCAA and league-wide data not integrated** |
+| Favorite sport/team/player | Five sports selectable; free-text team/player preference saved. ESPN team/player selectors and per-game statistics now implemented with explicit coverage limits |
+| NBA/WNBA/NCAA/NFL/MLB/soccer/NHL coverage | Ten ESPN league adapters now include NBA/WNBA/NCAA men/women, MLB, NFL/NCAA football, EPL/MLS and NHL; original bundles remain offline fallbacks |
 | Real data/source/season/date/scope | Verified Warriors 2015 Finals extract with attribution, dates, units, scope and license; original observations shown |
 | Multiple provider layer | Independent normalized bundled/MLB adapters, timeout and visible fallback. No subscription required |
 | 5+ fully interactive lessons | **12** topics, each with worked math, numerical practice, hint and deterministic grading |
@@ -20,7 +20,7 @@
 | Editable datasets/visualization | Explorer area/bar switch and accessible numeric table; most worked lessons allow custom values. No arbitrary paired data editor yet |
 | Sample vs population, descriptive vs inferential | Explained and sample/population spread toggle implemented |
 | Guided learning and skill levels | Hints before answer, retry feedback, three saved levels used in tutor context. No autonomous validated student ability model |
-| AI tutor | Contextual offline guide works; secure Gemini adapter, tool execution, history, opt-in and mocked contract tests implemented. **Live generative model not tested or connected without a key** |
+| AI tutor | Contextual offline guide works; secure Gemini adapter, tool execution, history, opt-in and mocked contract tests implemented. Live Gemini has been verified, but current free-tier search/provider quota failures are explicitly handled |
 | Numerical reliability | Pure engine with unit tests; grading never delegates arithmetic to a model. AI prose is not fully numerically verified at runtime |
 | Progress/quiz/review | Topic practice, attempt accuracy, incorrect-attempt hints, next unpracticed recommendation and persisted history. One question per topic; no broad quiz bank, streak or unearned mastery claims |
 | Private student data | No syllabus retention, no stored chats. SQLite profile/attempt storage; **production authentication/access controls absent** |

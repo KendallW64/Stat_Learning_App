@@ -50,3 +50,7 @@ Official Gemini SDK README and types were inspected from https://github.com/goog
 ## Configuration diagnostics
 
 `npm test` now passes 34 tests, including separate Gemini-secret/quota-binding checks and client handling of missing URLs, invalid responses, HTTP 404 and network failures. Six browser scenarios and the actual Wrangler dry-run also pass. Diagnostics expose only binding-presence booleans, not key values.
+
+## Expanded functional coverage
+
+See `RELIABILITY_AUDIT.md` for the current 44 unit/API/formula checks, 11 browser scenarios, two Pages scenarios and real sports-provider validation. The public-provider check workflow passed all ten representative league team selections. The active Worker returned real NBA/MLB/NFL/NHL player observations. Gemini search quota failures and a transient generation failure were observed and are not counted as successful research. Deletion, pending-turn cancellation, sourced-selector persistence, PDF extraction and cited math display were tested in real Chromium with controlled model/provider fixtures.

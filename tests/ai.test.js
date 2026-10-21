@@ -73,3 +73,8 @@ test('Gemini web research only displays answers with HTTPS grounding source link
 test('tutor reloads selected sports observations and never substitutes another team when verification fails',async()=>{
  const unavailable=createAIEngine({getKey:()=> 'test',dataProvider:{dataset:async()=>{throw new Error('missing');}}});const result=await unavailable.tutor({message:'Explain my selected scores',topic:'center',dataset:{league:'nba',team:'9',season:2025}});assert.equal(result.ai,false);assert.equal(result.reason,'dataset-unavailable');
 });
+test('only transient provider server errors get a bounded retry; quota errors do not trigger extra calls',async()=>{
+ let calls=0;const recovered=engine(async()=>{calls++;return calls===1?{ok:false,status:503,json:async()=>({})}:model([{text:'The mean is the sum divided by the count.'}]);});
+ const result=await recovered.tutor({topic:'center',message:'What is a mean?'});assert.equal(result.ai,true);assert.equal(calls,2);
+ let quotaCalls=0;const capped=engine(async()=>{quotaCalls++;return{ok:false,status:429,json:async()=>({})};});await capped.tutor({topic:'center',message:'What is a mean?'});assert.equal(quotaCalls,1);
+});
