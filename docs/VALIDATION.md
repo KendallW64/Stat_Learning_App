@@ -46,3 +46,7 @@ The workflow builds from `main` with Pages-provided base paths and deploys only 
 - No real Cloudflare account was deployed from this environment, no Gemini key was supplied, and no provider charge or live model response is claimed. Public deployment and free-tier model eligibility remain dependent on account configuration.
 
 Official Gemini SDK README and types were inspected from https://github.com/googleapis/js-genai for `generateContent`, function declarations, JSON schema configuration and response handling. The model alias follows its example, but real model access must be verified in the user's own AI Studio account. Free-tier data-use/privacy and account limits require review before submitting any non-demo data.
+
+## Configuration diagnostics
+
+`npm test` now passes 34 tests, including separate Gemini-secret/quota-binding checks and client handling of missing URLs, invalid responses, HTTP 404 and network failures. Six browser scenarios and the actual Wrangler dry-run also pass. Diagnostics expose only binding-presence booleans, not key values.

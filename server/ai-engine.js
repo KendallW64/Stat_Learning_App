@@ -73,7 +73,7 @@ export function createAIEngine({getKey=()=>process.env.GEMINI_API_KEY,getModel=(
     return candidate.content;
   }
   const textOf=content=>content.parts.filter(p=>typeof p.text==='string'&&!p.thought).map(p=>p.text).join('\n').trim();
-  function status(){return {available:Boolean(getKey()),provider:'Gemini',model:getModel()};}
+  function status(){const configured=Boolean(getKey());return {available:configured,provider:'Gemini',model:getModel(),reason:configured?'configured':'missing-key',checks:{geminiKeyPresent:configured}};}
   async function tutor(body) {
     const {message,topic='spread'}=body;
     if(typeof message!=='string'||!message.trim()||message.length>2000||!topicIds.has(topic))throw new Error('Ask a question of up to 2,000 characters about a selected lesson.');

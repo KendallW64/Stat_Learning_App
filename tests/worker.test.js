@@ -22,3 +22,8 @@ test('Worker validates requests and can teach offline without Gemini credentials
  assert.equal((await worker.fetch(req('/api/ai/tutor',{message:'x'.repeat(100001),topic:'spread'}),env)).status,413);
  assert.equal((await worker.fetch(req('/api/ai/tutor',{message:'Help',topic:'spread'}),{})).status,503);
 });
+test('Worker status reports exactly which required binding is missing without revealing a value',async()=>{
+ const noKey=await(await worker.fetch(req('/api/ai/status'),{AI_BUDGET:binding()})).json();assert.equal(noKey.reason,'missing-key');assert.deepEqual(noKey.checks,{geminiKeyPresent:false,quotaBindingPresent:true});
+ const noQuota=await(await worker.fetch(req('/api/ai/status'),{GEMINI_API_KEY:'not-a-real-key'})).json();assert.equal(noQuota.reason,'missing-quota-binding');assert.deepEqual(noQuota.checks,{geminiKeyPresent:true,quotaBindingPresent:false});assert.equal(JSON.stringify(noQuota).includes('not-a-real-key'),false);
+ const ready=await(await worker.fetch(req('/api/ai/status'),{GEMINI_API_KEY:'not-a-real-key',AI_BUDGET:binding()})).json();assert.equal(ready.reason,'configured');assert.equal(ready.available,true);
+});

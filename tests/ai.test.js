@@ -49,3 +49,10 @@ test('browser AI consent and HTTPS controls keep keys and private context out of
  const insecure=createAIClient({base:'http://insecure.example.test',student:'student-test-123456',fetcher:async()=>{throw new Error('must not fetch');}});assert.equal((await insecure.status()).available,false);
  const disabled=createAIClient({enabled:false,fetcher:async()=>{throw new Error('must not fetch');}});assert.equal((await disabled.status()).available,false);
 });
+test('AI status distinguishes a missing URL, a missing secret, an invalid endpoint and a network failure',async()=>{
+ const noURL=createAIClient({enabled:false});assert.equal((await noURL.status()).reason,'not-connected');
+ const missing=createAIClient({base:'https://ai.example.test',fetcher:async()=>({ok:true,json:async()=>({available:false,reason:'missing-key',checks:{geminiKeyPresent:false}})})});assert.equal((await missing.status()).reason,'missing-key');assert.equal((await missing.status()).statusUrl,'https://ai.example.test/api/ai/status');
+ const malformed=createAIClient({fetcher:async()=>({ok:true,json:async()=>({status:'ok'})})});assert.equal((await malformed.status()).reason,'invalid-response');
+ const missingRoute=createAIClient({fetcher:async()=>({ok:false,status:404})});assert.equal((await missingRoute.status()).reason,'endpoint-not-found');
+ const network=createAIClient({fetcher:async()=>{throw new TypeError('Failed to fetch');}});assert.equal((await network.status()).reason,'unreachable');
+});

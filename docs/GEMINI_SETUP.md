@@ -107,3 +107,13 @@ npm run deploy:ai         # real deployment; requires Cloudflare authentication
 For a local Gemini test, put `GEMINI_API_KEY` in ignored `.dev.vars`, and add your local browser origin to `AI_ALLOWED_ORIGINS` in `wrangler.toml`. Never use a real key in a checked-in fixture. In a sandbox with a read-only home, prefix Wrangler commands with `XDG_CONFIG_HOME=/tmp/sportsstats-cloudflare`.
 
 You can also deploy from your own terminal with `npx wrangler login`, `npm run deploy:ai`, then `npx wrangler secret put GEMINI_API_KEY` (interactive secure entry). This avoids storing a Cloudflare token in GitHub, but subsequent Worker deployments are then manual unless you configure Actions.
+
+## Diagnosing “AI not configured”
+
+`/api/ai/status` reports only booleans and public configuration, never secret values. Current builds include `reason` and `checks`:
+
+- `missing-key`: Cloudflare does not have a `GEMINI_API_KEY` binding on this Worker deployment. Add an encrypted secret on **stat-learning-app**, then deploy/save that version.
+- `missing-quota-binding`: deploy from the repository root with Wrangler so `AI_BUDGET` and its migration are created.
+- `configured`: both bindings exist; only a real successful tutor request proves Google accepts the key/model.
+
+A response containing only `available`, `provider` and `model` is an older Worker build. Redeploy the latest main branch for precise checks. A network/CORS failure is reported separately and is not evidence of a missing Gemini secret.

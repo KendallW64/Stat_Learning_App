@@ -6,6 +6,7 @@ import {lessons,worked,practice,paired} from '../shared/lessons.js';
 import {describe,round} from '../shared/stats.js';
 import './styles.css';
 import {api,isPages,aiClient} from './api.js';
+import {describeAIStatus} from './ai-client.js';
 const navigation=[['Dashboard',LayoutDashboard],['My Statistics Course',GraduationCap],['Sports Data Explorer',ChartNoAxesCombined],['Learn Statistics',BookOpen],['AI Statistics Tutor',MessageSquare],['Progress & Practice',Target]];
 const sports=['Basketball','Baseball','Football','Soccer','Hockey'];
 const sportIcon={Basketball:'◉',Baseball:'⚾',Football:'◈',Soccer:'⚽',Hockey:'◒'};
@@ -47,6 +48,7 @@ function Practice({topic,onComplete,hasProfile,go}){const p=practice(topic),[ans
 function Tutor({topic,setTopic,profile,progress}) {
  const [messages,setMessages]=useState([{role:'assistant',text:'Let’s make statistics click. Choose a lesson and ask about a formula, a calculation step, or a practice hint.',mode:'Offline guide available · connect AI for conversational explanations'}]);
  const [input,setInput]=useState(''),[busy,setBusy]=useState(false),[connection,setConnection]=useState(null),[useAI,setUseAI]=useState(false);
+ const connectionMessage=describeAIStatus(connection);
  async function checkConnection(){setConnection(null);const client=await aiClient();setConnection(await client.status());}
  useEffect(()=>{let active=true;aiClient().then(c=>c.status()).then(result=>{if(active)setConnection(result);});return()=>{active=false;};},[]);
  async function send(text){
@@ -59,7 +61,7 @@ function Tutor({topic,setTopic,profile,progress}) {
   }catch{setMessages(m=>[...m,{role:'assistant',text:'This question could not be processed. Please try again.',mode:'Request failed'}]);}finally{setBusy(false);}
  }
  return <><Heading eyebrow="YOUR PERSONAL STATS CORNER" title="Let’s figure it out, together." description="Ask why. Try another example. Build your understanding one question at a time."/>
- <div className="ai-connection"><span className={'connection-dot '+(connection?.available?'connected':'')}/><div><strong>{connection===null?'Checking AI connection…':connection.available?'AI service configured · Gemini':connection.reason==='unreachable'?'AI service unreachable · offline guide available':'AI not configured · offline guide available'}</strong><p>{connection?.available?'Enable AI below to send questions and selected learning context to the model. Calculations and grading use the statistics engine.':'The offline guide still works. To enable conversational AI, connect the secure backend and its server-side key; see the deployment guide.'}</p></div><button className="text-button" onClick={checkConnection}>Check connection</button></div>
+ <div className="ai-connection"><span className={'connection-dot '+(connection?.available?'connected':'')}/><div><strong>{connectionMessage.title}</strong><p>{connectionMessage.description}</p>{connection?.statusUrl?.startsWith('https://')&&<a className="text-button" href={connection.statusUrl} target="_blank" rel="noreferrer">View Worker status <ExternalLink size={12}/></a>}</div><button className="text-button" onClick={checkConnection}>Check connection</button></div>
  <div className="tutor-layout"><div className="panel chat-panel"><div className="chat-heading"><span className="tutor-icon"><MessageSquare size={23}/></span><div><h3>Academy tutor</h3><span>Guidance first. Answers earned.</span></div><span className="badge">{useAI?'AI assistance':'Offline guide'}</span></div>
  <label className="ai-consent chat-consent"><input type="checkbox" checked={useAI} disabled={!connection?.available||busy} onChange={e=>setUseAI(e.target.checked)}/><span><strong>Use AI for this conversation</strong><small>Shares your question, recent conversation, selected course topics, sport, level and topic attempt counts with Gemini. Syllabus text and personal team/player preferences are not sent. Use demo content only: free-tier provider terms may allow prompts to improve services. Do not send private student information.</small></span></label>
  <div className="chat-messages" aria-live="polite">{messages.map((m,i)=><div className={'chat-message '+m.role} key={i}><span className="message-avatar">{m.role==='user'?'S':'✦'}</span><div><span className="message-name">{m.role==='user'?'You':'Stats tutor'}</span><p>{m.text}</p>{m.mode&&<small>{m.mode}</small>}</div></div>)}{busy&&<div className="muted">Working through your question…</div>}</div>

@@ -18,7 +18,10 @@ export default {
       });
       if(!quota.ok)throw new Error('Daily Gemini request allowance reached.');
     }});
-    if(url.pathname==='/api/ai/status'&&request.method==='GET')return json({...engine.status(),available:Boolean(env.GEMINI_API_KEY&&env.AI_BUDGET)});
+    if(url.pathname==='/api/ai/status'&&request.method==='GET'){
+      const keyPresent=Boolean(env.GEMINI_API_KEY),quotaPresent=Boolean(env.AI_BUDGET);
+      return json({...engine.status(),available:keyPresent&&quotaPresent,reason:!keyPresent?'missing-key':!quotaPresent?'missing-quota-binding':'configured',checks:{geminiKeyPresent:keyPresent,quotaBindingPresent:quotaPresent}});
+    }
     const action={'/api/ai/tutor':'tutor','/api/ai/course':'course'}[url.pathname];
     if(!action)return json({error:'Endpoint not found.'},404);
     if(request.method!=='POST')return json({error:'Use POST.'},405);
