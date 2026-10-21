@@ -8,7 +8,7 @@ export function createAIClient({base='',enabled=true,student,fetcher=fetch}={}) 
     if(root&&!/^https:\/\//i.test(root)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(root))throw new Error('AI service must use HTTPS.');
     const response=await fetcher(`${root}/api/ai/${path}`,{
       method:body?'POST':'GET',headers:{'Content-Type':'application/json','x-student-id':student},
-      ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(path==='tutor'?70000:25000),
+      ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(path==='status'?15000:70000),
     });
     if(!response.ok){const error=new Error(response.status===429?'AI request limit reached. Please wait before trying again.':'The AI service could not be reached.');error.code=response.status===404?'endpoint-not-found':response.status===403?'forbidden':response.status===429?'rate-limited':'service-error';throw error;}
     return response.json();

@@ -16,7 +16,7 @@ export default {
       const quota=await env.AI_BUDGET.get(env.AI_BUDGET.idFromName('global')).fetch('https://quota.internal/reserve',{
         method:'POST',body:JSON.stringify({kind:'model',dailyLimit:env.AI_DAILY_REQUEST_LIMIT||'40'}),
       });
-      if(!quota.ok)throw new Error('Daily Gemini request allowance reached.');
+      if(!quota.ok){const error=new Error('Daily Gemini request allowance reached.');error.code='app-quota-exceeded';throw error;}
     }});
     if(url.pathname==='/api/ai/status'&&request.method==='GET'){
       const keyPresent=Boolean(env.GEMINI_API_KEY),quotaPresent=Boolean(env.AI_BUDGET);

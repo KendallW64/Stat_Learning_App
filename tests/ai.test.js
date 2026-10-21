@@ -56,3 +56,11 @@ test('AI status distinguishes a missing URL, a missing secret, an invalid endpoi
  const missingRoute=createAIClient({fetcher:async()=>({ok:false,status:404})});assert.equal((await missingRoute.status()).reason,'endpoint-not-found');
  const network=createAIClient({fetcher:async()=>{throw new TypeError('Failed to fetch');}});assert.equal((await network.status()).reason,'unreachable');
 });
+test('live-provider failures produce safe, specific diagnostics without leaking provider text or keys',async()=>{
+ for(const [status,reason]of [[400,'provider-request-rejected'],[401,'provider-key-rejected'],[403,'provider-access-denied'],[404,'provider-model-unavailable'],[429,'provider-quota-exceeded']]){
+  const ai=engine(async()=>({ok:false,status,json:async()=>({error:{message:'Sensitive provider detail must not be echoed'}})}));
+  const result=await ai.tutor({message:'Explain variance',topic:'spread'});assert.equal(result.reason,reason);assert.equal(JSON.stringify(result).includes('Sensitive provider detail'),false);assert.equal(result.ai,false);
+ }
+ const slow=engine(async()=>{throw new DOMException('Request timed out','TimeoutError');});assert.equal((await slow.tutor({message:'Explain variance',topic:'spread'})).reason,'provider-timeout');
+ const truncated=engine(async()=>({ok:true,json:async()=>({candidates:[{finishReason:'MAX_TOKENS',content:{role:'model',parts:[{text:'unfinished'}]}}]})}));assert.equal((await truncated.tutor({message:'Explain variance',topic:'spread'})).reason,'provider-output-limit');
+});

@@ -6,7 +6,7 @@ export function createAIRoutes({fetcher=fetch}={}){
   const positive=(value,fallback)=>Number.isInteger(Number(value))&&Number(value)>0?Number(value):fallback;
   const engine=createAIEngine({fetcher,beforeRequest(){
     const today=new Date().toISOString().slice(0,10);if(day!==today){day=today;used=0;}
-    if(used>=positive(process.env.AI_DAILY_REQUEST_LIMIT,40))throw new Error('Daily AI request allowance exhausted.');used++;
+    if(used>=positive(process.env.AI_DAILY_REQUEST_LIMIT,40)){const error=new Error('Daily AI request allowance exhausted.');error.code='app-quota-exceeded';throw error;}used++;
   }});
   function cors(req,res,next){
     const origin=req.get('origin'),allowed=(process.env.AI_ALLOWED_ORIGINS||'https://kendallw64.github.io,http://localhost:3000,http://127.0.0.1:3000').split(',').map(x=>x.trim());
