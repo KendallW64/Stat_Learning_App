@@ -1,0 +1,31 @@
+# Validation and mathematical conventions
+
+## Executed checks
+
+- `npm test`: 20 passing tests covering deterministic formulas, every lesson's worked/practice contract, invalid numeric data, unknown course handling, complete API journey, persistence, student ID separation, provider fixtures/failures and tutor fallback.
+- `npm run test:ui`: 5 passing Chromium scenarios covering full student journey and saved progress after reload; provider-unavailable interface plus tutor hint; mobile navigation and lesson overflow at 390 px; all 12 worked examples and graded responses; local syllabus upload and explicit topic confirmation.
+- Clean `npm ci --cache /tmp/sports-npm` and `npm run build`: installation and production Vite build passed. Recharts creates a large JavaScript bundle; code splitting is a future performance improvement.
+- Actual historical dataset retrieval succeeded through GitHub; source hash and extraction documented separately.
+- Direct MLB and Basketball Reference requests returned proxy 403. MLB success is fixture-tested; current live availability is **not** verified.
+- OpenAI integration is mocked-contract tested; no key is configured and no live AI response is claimed.
+- Production `npm start` was exercised after clean installation: HTML, health and six-game attributed dataset passed HTTP smoke checks; all five browser scenarios also passed against the production server.
+- Docker build was not run.
+
+## Formula references and conventions
+
+Standard definitions align with the NIST/SEMATECH e-Handbook descriptions of [measures of location](https://www.itl.nist.gov/div898/handbook/eda/section3/eda351.htm), [scale](https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm), and the [normal distribution](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm). Quartile convention is explicitly R type 7 ([R quantile documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html)). These are reference links, not claims of a live reference-site retrieval.
+
+Tests use independently calculable values: data [2,4,4,4,5,5,7,9] has μ=5, population variance=4 and sample variance=32/7; exact straight-line paired observations give slope=2, intercept=1 and r=1. Normal CDF is compared to conventional normal tables at z=0, 1 and ±1.96, to absolute tolerance 1e-6. The CDF uses Abramowitz & Stegun 7.1.26's erf approximation (maximum absolute erf error approximately 1.5e-7).
+
+- Sample variance divides by n−1; population variance divides by n. Sample SD itself is not claimed unbiased.
+- Quartiles use linear interpolation at (n−1)p. Other courses may prescribe other conventions.
+- SE assumes independent identically distributed sampling; sample s estimates σ where marked.
+- Confidence and hypothesis lessons explicitly assume **known σ=12**, normal observations or sufficient-sample normal approximation, and valid independent sampling. Selected sports windows are illustrative, not evidence those assumptions hold. With unknown σ, a t procedure is appropriate under its assumptions and is planned.
+- Two-sided p = 2[1−Φ(|z|)]. A p-value does not give P(H₀ true).
+- Regression is ordinary least squares with paired data and nonzero variance in both coordinates. Association is not causation. Demonstration predictions are not a validated model.
+- Numerical grading permits absolute error up to 0.0050001, so rounding to 2–3 decimal places is accepted; blank/nonfinite answers are rejected. Displayed worked values are rounded to 3 decimals; calculations retain full precision.
+- Practice uses small synthetic datasets to avoid invented sports records. Correct answers are displayed only after submission succeeds.
+
+## Remaining quality work
+
+Production identity/privacy/security controls, accessibility audit with assistive technology, broader device matrix, live-provider and model smoke tests with configured access, additional question banks, held-out model validation and performance/code splitting remain future work. Browser tests exercise one complete lesson journey plus every lesson's mathematical contract in unit tests; they do not assert that every possible learning interaction is exhaustive.

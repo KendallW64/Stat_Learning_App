@@ -1,0 +1,47 @@
+{
+  "id": "warriors-2015",
+  "title": "Golden State Warriors \u00b7 2015 Finals",
+  "sport": "Basketball",
+  "league": "NBA",
+  "team": "Golden State Warriors",
+  "player": "Team scoring",
+  "unit": "points",
+  "kind": "Historical",
+  "season": "2014\u201315",
+  "source": "FiveThirtyEight NBA Elo / Basketball Reference game results",
+  "url": "https://github.com/fivethirtyeight/data/blob/master/nba-elo/nbaallelo.csv",
+  "scope": "All six Warriors games in the 2015 NBA Finals against Cleveland. Team points per game, including overtime. This series is a complete finite population; it is not a random sample of all Warriors games.",
+  "license": "FiveThirtyEight data: CC BY 4.0. Original results attributed to Basketball Reference.",
+  "rows": [
+    {
+      "date": "6/4/2015",
+      "label": "Game 1",
+      "value": 108.0
+    },
+    {
+      "date": "6/7/2015",
+      "label": "Game 2",
+      "value": 93.0
+    },
+    {
+      "date": "6/9/2015",
+      "label": "Game 3",
+      "value": 91.0
+    },
+    {
+      "date": "6/11/2015",
+      "label": "Game 4",
+      "value": 103.0
+    },
+    {
+      "date": "6/14/2015",
+      "label": "Game 5",
+      "value": 104.0
+    },
+    {
+      "date": "6/16/2015",
+      "label": "Game 6",
+      "value": 105.0
+    }
+  ]
+}

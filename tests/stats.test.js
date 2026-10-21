@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {mean,median,modes,variance,sd,quantile,zscore,normalCDF,regression,grade,describe} from '../shared/stats.js';
+import {lessons,worked,practice,identify} from '../shared/lessons.js';
+const near=(a,b,t=1e-6)=>assert.ok(Math.abs(a-b)<t,`${a} ≠ ${b}`);
+test('Analytically verified example: population σ=2 and sample s=√(32/7)',()=>{const x=[2,4,4,4,5,5,7,9];near(mean(x),5);near(variance(x,false),4);near(sd(x,false),2);near(variance(x),32/7);near(sd(x),Math.sqrt(32/7));});
+test('center, mode ties, and no repeated mode',()=>{near(median([7,1,5,3]),4);near(median([7,1,5]),5);assert.deepEqual(modes([1,2,2,3,3]),[2,3]);assert.deepEqual(modes([1,2,3]),[]);near(mean([-2,0,2]),0);});
+test('quantiles use R type 7 interpolation and preserve input',()=>{const x=[16,8,14,10,12];near(quantile(x,.25),10);near(quantile([0,10],.25),2.5);assert.deepEqual(x,[16,8,14,10,12]);});
+test('z-score and standard error practice',()=>{near(zscore(16,[8,10,12,14,16]),4/Math.sqrt(10));near(practice('sampling').expected,2);near(practice('confidence').expected,3.92);});
+test('normal probabilities match standard normal reference tables',()=>{near(normalCDF(0),.5);near(normalCDF(1),.841344746,1e-6);near(normalCDF(1.96),.975002105,1e-6);near(normalCDF(-1.96),.024997895,1e-6);near(normalCDF(8),1);});
+test('regression exact line, correlation and extrapolation arithmetic',()=>{const r=regression([1,2,3],[3,5,7]);near(r.slope,2);near(r.intercept,1);near(r.r,1);near(practice('prediction').expected,14);});
+test('invalid data and degenerate variance are rejected',()=>{assert.throws(()=>mean([]));assert.throws(()=>mean([NaN]));assert.throws(()=>sd([1]));assert.throws(()=>zscore(1,[2,2]));assert.throws(()=>regression([1,1,1],[2,3,4]));assert.throws(()=>regression([1,2,3],[2,3,4,5]));assert.throws(()=>quantile([1,2],2));});
+test('grading accepts rounding, rejects blank, wrong, and non-finite responses',()=>{assert.equal(grade('3.16',Math.sqrt(10)),true);assert.equal(grade('',0),false);assert.equal(grade(' ',0),false);assert.equal(grade('no',0),false);assert.equal(grade(3,Math.sqrt(10)),false);assert.equal(grade(Infinity,1),false);assert.equal(grade(.04,.04999565),false);assert.equal(grade(.05,.04999565),true);});
+test('every topic has finite worked result and a gradable practice with hint',()=>{assert.equal(lessons.length,12);for(const l of lessons){const r=worked(l.id,[108,93,91,103,104,105]);assert.ok(Number.isFinite(r.value),l.id);assert.ok(r.steps.length>=3);const p=practice(l.id);assert.ok(p.hint);assert.equal(grade(p.expected,p.expected),true);assert.equal(grade(p.expected+10,p.expected),false);}});
+test('population vs sample division in worked lesson',()=>{near(worked('spread',[2,4,4,4,5,5,7,9],false).value,2);near(worked('spread',[2,4,4,4,5,5,7,9],true).value,Math.sqrt(32/7));});
+test('course numbers never imply verified topics',()=>{assert.deepEqual(identify('University STATS 101'),[]);assert.deepEqual(identify('standard deviation, mean, regression'),['center','spread','regression']);assert.deepEqual(identify('AP Statistics'),[]);});
+test('score deviation audit table sums to zero',()=>{const d=describe([108,93,91,103,104,105]);near(d.steps.reduce((s,r)=>s+r.deviation,0),0);near(d.steps.reduce((s,r)=>s+r.squared,0)/5,d.variance);});
