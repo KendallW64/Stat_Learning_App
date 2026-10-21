@@ -26,5 +26,6 @@ export function createAIRoutes({fetcher=fetch}={}){
   router.get('/status',(_req,res)=>res.json(engine.status()));
   router.post('/tutor',limit,tutor);
   router.post('/course',limit,handler('course'));
+  router.post('/research',limit,handler('research'));
   return{router,cors,limit,tutor};
 }

@@ -64,3 +64,12 @@ test('live-provider failures produce safe, specific diagnostics without leaking 
  const slow=engine(async()=>{throw new DOMException('Request timed out','TimeoutError');});assert.equal((await slow.tutor({message:'Explain variance',topic:'spread'})).reason,'provider-timeout');
  const truncated=engine(async()=>({ok:true,json:async()=>({candidates:[{finishReason:'MAX_TOKENS',content:{role:'model',parts:[{text:'unfinished'}]}}]})}));assert.equal((await truncated.tutor({message:'Explain variance',topic:'spread'})).reason,'provider-output-limit');
 });
+test('Gemini web research only displays answers with HTTPS grounding source links',async()=>{
+ let payload;
+ const ai=engine(async(url,options)=>{payload=JSON.parse(options.body);return{ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{role:'model',parts:[{text:'Standard deviation measures spread. See the original reference.'}]},groundingMetadata:{groundingChunks:[{web:{uri:'https://www.nist.gov/statistics',title:'NIST reference'}},{web:{uri:'javascript:alert(1)',title:'Unsafe'}}]}}]})};});
+ const result=await ai.research({message:'Find a statistical reference for standard deviation'});assert.equal(result.ai,true);assert.equal(result.sources.length,1);assert.equal(result.sources[0].title,'NIST reference');assert.deepEqual(payload.tools,[{googleSearch:{}}]);
+ const noSources=engine(async()=>model([{text:'An uncited claim'}]));const blocked=await noSources.research({message:'Find a source'});assert.equal(blocked.ai,false);assert.equal(blocked.text.includes('An uncited claim'),false);
+});
+test('tutor reloads selected sports observations and never substitutes another team when verification fails',async()=>{
+ const unavailable=createAIEngine({getKey:()=> 'test',dataProvider:{dataset:async()=>{throw new Error('missing');}}});const result=await unavailable.tutor({message:'Explain my selected scores',topic:'center',dataset:{league:'nba',team:'9',season:2025}});assert.equal(result.ai,false);assert.equal(result.reason,'dataset-unavailable');
+});

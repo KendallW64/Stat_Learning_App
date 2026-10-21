@@ -1,4 +1,5 @@
 import express from 'express';
+import {createSportsProvider} from '../shared/sports-provider.js';
 import {createAIRoutes} from './ai-routes.js';
 import {DatabaseSync} from 'node:sqlite';
 import fs from 'node:fs';
@@ -9,7 +10,8 @@ export function createApp({dbPath=process.env.DB_PATH||'.runtime/academy.sqlite'
  if(dbPath!==':memory:')fs.mkdirSync(dbPath.substring(0,dbPath.lastIndexOf('/'))||'.',{recursive:true});
  const db=new DatabaseSync(dbPath);db.exec('PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS profiles (id TEXT PRIMARY KEY, body TEXT NOT NULL); CREATE TABLE IF NOT EXISTS attempts (id INTEGER PRIMARY KEY, student TEXT NOT NULL, topic TEXT NOT NULL, answer REAL NOT NULL, correct INTEGER NOT NULL, created TEXT DEFAULT CURRENT_TIMESTAMP);');
  const app=express();if(process.env.TRUST_PROXY==='1')app.set('trust proxy',1);app.disable('x-powered-by');app.use(express.json({limit:'128kb'}));
- const ai=createAIRoutes({fetcher});app.use('/api/ai',ai.cors);
+ const ai=createAIRoutes({fetcher});app.use('/api/ai',ai.cors);app.use('/api/sports',ai.cors);
+ const sportsProvider=createSportsProvider({fetcher});app.get('/api/sports',async(req,res)=>{try{res.json(await sportsProvider.route(new URLSearchParams(req.query)));}catch(e){res.status(e.status||502).json({error:e.message});}});
  app.get('/api/health',(_req,res)=>res.json({status:'ok'}));
  app.use('/api',(req,res,next)=>{const id=req.get('x-student-id');if(!id||!/^[a-zA-Z0-9-]{16,80}$/.test(id))return res.status(400).json({error:'A valid browser student identifier is required.'});req.student=id;next();});
  const getProfile=id=>{const row=db.prepare('SELECT body FROM profiles WHERE id=?').get(id);return row?JSON.parse(row.body):null;};

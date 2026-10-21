@@ -1,4 +1,6 @@
 import {createAIEngine} from '../server/ai-engine.js';
+import {createSportsProvider} from '../shared/sports-provider.js';
+const sportsProvider=createSportsProvider();
 export {AIBudget} from './budget.js';
 
 export default {
@@ -11,7 +13,8 @@ export default {
     if(origin){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Methods']='GET,POST,OPTIONS';headers['Access-Control-Allow-Headers']='Content-Type,X-Student-Id';}
     if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
     if(url.pathname==='/api/health')return json({status:'ok'});
-    const engine=createAIEngine({getKey:()=>env.GEMINI_API_KEY,getModel:()=>env.GEMINI_MODEL||'gemini-flash-latest',beforeRequest:async()=>{
+    if(url.pathname==='/api/sports'&&request.method==='GET'){try{return json(await sportsProvider.route(url.searchParams));}catch(error){return json({error:error.message},error.status||502);}}
+    const engine=createAIEngine({dataProvider:sportsProvider,getKey:()=>env.GEMINI_API_KEY,getModel:()=>env.GEMINI_MODEL||'gemini-flash-latest',beforeRequest:async()=>{
       if(!env.AI_BUDGET)throw new Error('Budget service not configured.');
       const quota=await env.AI_BUDGET.get(env.AI_BUDGET.idFromName('global')).fetch('https://quota.internal/reserve',{
         method:'POST',body:JSON.stringify({kind:'model',dailyLimit:env.AI_DAILY_REQUEST_LIMIT||'40'}),
@@ -22,7 +25,7 @@ export default {
       const keyPresent=Boolean(env.GEMINI_API_KEY),quotaPresent=Boolean(env.AI_BUDGET);
       return json({...engine.status(),available:keyPresent&&quotaPresent,reason:!keyPresent?'missing-key':!quotaPresent?'missing-quota-binding':'configured',checks:{geminiKeyPresent:keyPresent,quotaBindingPresent:quotaPresent}});
     }
-    const action={'/api/ai/tutor':'tutor','/api/ai/course':'course'}[url.pathname];
+    const action={'/api/ai/tutor':'tutor','/api/ai/course':'course','/api/ai/research':'research'}[url.pathname];
     if(!action)return json({error:'Endpoint not found.'},404);
     if(request.method!=='POST')return json({error:'Use POST.'},405);
     const id=request.headers.get('X-Student-Id');if(!id||!/^[a-zA-Z0-9-]{16,80}$/.test(id))return json({error:'A valid browser student identifier is required.'},400);
