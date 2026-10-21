@@ -8,6 +8,21 @@ GitHub Pages → HTTPS Cloudflare Worker → Gemini Developer API. Course/profil
 
 For a **free-only demonstration**, keep Cloudflare on its Free plan and use a Gemini project/model with an available free quota and no paid billing enabled. Model/region/account eligibility and provider quotas change; a key by itself does not guarantee free usage. This app does not enable billing, upgrade plans, or buy credits. If a selected model is unavailable or quota is exhausted, it shows the offline guide. Check current terms in your own Cloudflare and Google accounts before deploying.
 
+## Simplest route: create a separate Worker in the Cloudflare dashboard
+
+This route uses Cloudflare’s Git integration, so you do **not** need to copy a Cloudflare API key or token into GitHub.
+
+1. Open **Cloudflare → Workers & Pages → Create application → GitHub**. Authorize access to this repository if prompted.
+2. Import **`KendallW64/Stat_Learning_App`**, branch **`main`**. Create a **Worker**, not a second Pages frontend.
+3. Set the Worker name to exactly **`sportsstats-academy-ai`**, matching `wrangler.toml`. Leave the existing handoff app Worker unchanged.
+4. Use the repository root (`/`), **build command `npm ci`**, and **deploy command `npx wrangler deploy`**. If Cloudflare has already installed dependencies automatically, the explicit build command simply repeats the locked install. Deploy from the repository root so Wrangler discovers the checked-in configuration and Durable Object migration. Use Node 24 if selecting a build runtime.
+5. Deploy on the Cloudflare **Free** plan. If the account reports a requirement to upgrade, stop and check the free-plan capabilities rather than accepting a paid upgrade.
+6. After deployment, add **`GEMINI_API_KEY` as an encrypted Worker secret** using step 3 below. Set GitHub’s public **`AI_API_URL`** Actions variable and rerun Pages as described in step 4 below.
+
+The new Worker gets its own `workers.dev` address. This route does not deploy over the handoff app because the name is different. Use either Cloudflare Git builds or the manual GitHub Worker workflow as your deployment method; there is no need to configure both. Pages continues to deploy with its existing GitHub Actions workflow.
+
+The remaining numbered steps document the alternative GitHub Actions deployment method. If you deployed directly through Cloudflare, skip steps 1–2 and continue at step 3.
+
 ## 1. Store Cloudflare deployment credentials in GitHub
 
 Use your existing **Cloudflare API token** if it has permission to deploy Workers in the intended account. A **Global API Key is not the same as an API token** and must not be entered as `CLOUDFLARE_API_TOKEN`. If necessary, create a scoped token using Cloudflare’s **Edit Cloudflare Workers** template and restrict it to your account. This workers.dev deployment does not need access to an unrelated custom domain.
