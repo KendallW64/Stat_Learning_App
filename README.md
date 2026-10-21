@@ -1,5 +1,7 @@
 # SportsStats Academy
 
+Repository: `KendallW64/Stat_Learning_App`.
+
 A responsive React + Express statistics learning app with 12 interactive topics, transparent calculations, sourced historical NBA data, guided practice, a server-side optional AI adapter, and SQLite progress. The initial course-to-practice journey works without subscriptions or API keys.
 
 ## Run
