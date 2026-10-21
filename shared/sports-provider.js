@@ -34,11 +34,18 @@ export function createSportsProvider({fetcher=fetch,now=()=>Date.now()}={}){
  function config(id){const league=leagues.find(l=>l.id===id);if(!league)fail('Choose a supported league.');return league;}
  function season(value){const year=Number(value||new Date(now()).getUTCFullYear());if(!Number.isInteger(year)||year<2000||year>new Date(now()).getUTCFullYear()+1)fail('Choose an available season year between 2000 and next year.');return year;}
  async function teams(id){const league=config(id),url=`${ROOT}${league.path}/teams?limit=1000`;const data=await get(url);const rows=(data.sports?.[0]?.leagues?.[0]?.teams||[]).map(v=>v.team||v).filter(t=>t.id&&t.displayName).map(t=>({id:String(t.id),name:t.displayName,shortName:t.shortDisplayName||t.name,abbreviation:t.abbreviation}));if(!rows.length)fail('No teams were returned for this league.',404);return{teams:rows.sort((a,b)=>a.name.localeCompare(b.name)),source:'ESPN',url,scope:'Teams returned by the provider; coverage can vary by league.',retrievedAt:new Date(now()).toISOString()};}
- async function roster(id,team,year){const league=config(id),teamId=numericId(team,'team'),y=season(year),url=`${ROOT}${league.path}/teams/${teamId}/roster?season=${y}`;const data=await get(url);const rows=(data.athletes||[]).flatMap(v=>v.items||[v]).filter(p=>p.id&&(p.fullName||p.displayName)).map(p=>({id:String(p.id),name:p.fullName||p.displayName,position:p.position?.abbreviation||p.position?.name||''}));const unique=[...new Map(rows.map(p=>[p.id,p])).values()];return{players:unique.sort((a,b)=>a.name.localeCompare(b.name)),source:'ESPN',url,season:y,scope:'Roster returned by the provider; traded players and historical roster coverage may be incomplete.',retrievedAt:new Date(now()).toISOString()};}
+ async function roster(id,team,year){
+  const league=config(id),teamId=numericId(team,'team'),y=season(year);let url=`${ROOT}${league.path}/teams/${teamId}/roster?season=${y}`,data=await get(url),fallback=false;
+  const extract=value=>(value.athletes||[]).flatMap(v=>v.items||[v]).map(v=>v.athlete||v).filter(p=>p.id&&(p.fullName||p.displayName)).map(p=>({id:String(p.id),name:p.fullName||p.displayName,position:p.position?.abbreviation||p.position?.name||''}));
+  let rows=extract(data);
+  if(!rows.length){url=`${ROOT}${league.path}/teams/${teamId}/roster`;data=await get(url);rows=extract(data);fallback=true;}
+  const unique=[...new Map(rows.map(p=>[p.id,p])).values()];
+  return{players:unique.sort((a,b)=>a.name.localeCompare(b.name)),source:'ESPN',url,season:fallback?'current roster':y,warning:fallback?'A historical roster was unavailable. Player choices come from the current roster; selected historical game values still come only from that season’s box scores.':undefined,scope:'Roster returned by the provider; traded players and historical roster coverage may be incomplete.',retrievedAt:new Date(now()).toISOString()};
+ }
  async function dataset(query){
   const league=config(query.league),teamId=numericId(query.team,'team'),year=season(query.season),playerId=query.player?numericId(query.player,'player'):null;
   const stat=playerId?statisticsFor(league.id).find(s=>s.id===query.statistic):null;if(playerId&&!stat)fail('Choose a supported player statistic.');
-  const url=`${ROOT}${league.path}/teams/${teamId}/schedule?season=${year}&seasontype=2`,schedule=await get(url);
+  const url=`${ROOT}${league.path}/teams/${teamId}/schedule?season=${year}${league.sport==='Soccer'?'':'&seasontype=2'}`,schedule=await get(url);
   const teamName=schedule.team?.displayName||`Team ${teamId}`;
   const games=(schedule.events||[]).map(event=>{
    const c=event.competitions?.[0],status=c?.status?.type||event.status?.type;
